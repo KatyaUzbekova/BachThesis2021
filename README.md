@@ -1,2 +1,2 @@
-# BachThesis2021
-Design and experimental evaluation of a multi-fingered robotic gripper
+# Bachelor Thesis 2021
+### theme: Design and experimental evaluation of a multi-fingered robotic gripper
