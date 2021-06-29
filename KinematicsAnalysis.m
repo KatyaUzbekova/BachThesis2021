@@ -2,51 +2,34 @@
 % 
 clear
 close all
-syms w real;
+syms deltaX real;
+
 %% 0 Step: What we have
-PC = 2;
-h = 1; % from 1 to 2 
-OA = 5; % that give us 
-AB = 5;
-BC  = 3;
-DE = 2;
+AB = 38;
+BG = 11.296; 
+GC = 29.384; % that give us 
+CE = 45.7;
+FE  = 30;
+DF = 30.9;
+AO = 35.6 + deltaX;
+OC = 50.261;
+ugol1 = 142.5*pi/180;
 
-FE = 10;
-CD = FE; 
-aX0 = 0.4;
+BC = sqrt(GC^2 + BG^2 - 2*GC*BG*cos(ugol1));
+angle6 = asin(BG/BC*sin(ugol1));
 
+AC = sqrt(AO^2+OC^2);
+disp(AC)
 
-cX = AB + sqrt(BC^2 - PC^2);
-cY = OA + PC;
+angle8 = atan(AO/OC);
 
-beta0 = asin(PC/BC);
+angle7 = acos((AC^2 + BC^2 - AB^2)/(2*AC*BC));
 
-
-fX = 12;
-fY = 2 ; % we think as an example
-
-%% 1 STEP
-aX = aX0 - simplify(w/2/3.1416 * h);
-aY = OA;
-
-AP = cX - aX;
-AC = simplify(sqrt(PC*PC + AP*AP));
-fi = simplify(asin(PC/AC));
-
-% cosinus theorem:
-abc = simplify(acos((AB*AB + BC*BC - AC*AC)/2/AB/BC));
-% by sinus theorem
-ugolA = simplify(asin(BC/AC * sin(abc)));
-
-
-% angles alpha and beta
-alpha = ugolA - fi;
-beta = 3.1416 - abc - alpha;
-gamma = beta - beta0;
-
-
-eY = fY + FE*sin(gamma);
-eX = fX + FE*cos(gamma);
+angle2 = 90 - (angle7+angle8+angle6);
+Cx = 0;
+Cy = -OC;
+eY = Cy - CE*sin(angle2);
+eX = Cx - CE*cos(angle2);
 %% 3rd Step: Velocities and Accelerations for all points
 
 % velocity of Joint E
@@ -59,7 +42,7 @@ aEX = diff(vEX);
 %% 4th Step: Show Values of Joint E (or we consider it as an endeffector
 
 disp("Print X pos of E:")
-disp(simplify(eX))
+disp(eX)
 
 disp("Print Y pos of E:")
 disp(eY)
@@ -72,7 +55,7 @@ disp(eY)
 
 %% graphs: 
 
-w = 0;
+deltaX = 0;
 count = 0;
 
 eX1 = [];
@@ -84,32 +67,51 @@ eAY1 = [];
 eVX1 = [];
 eVY1 = [];
 
-for c = 0:130
-     w = c*0.06;
+Ax = deltaX;
+Ay = 0;
+
+
+Gx = cos(angle2)*GC+Cx;
+Gy = sin(angle2)*GC+Cy;
+
+
+Bx = cos(pi - angle2)*BG+Gx;
+By = sin(pi - angle2)*BG+Gy;
+
+Dx = eX - DF*cos(angle2);
+Dy = eY - DF*sin(angle2);
+
+Fx = eX;
+Fy = eY*FE;
+
+for c = 0:70
+     deltaX = c;
 
      eX1 = [eX1 eval(eX)];
      eY1 = [eY1 eval(eY)];
-     
+     disp(eval(eX));
+     disp(eval(eY))
+
      eVX1 = [eVX1 eval(vEX)];
      eVY1 = [eVY1 eval(vEY)];
      
      eAX1 = [eAX1 eval(aEX)];
      eAY1 = [eAY1 eval(aEY)];
      
-     bX = eval(simplify(aX + AB*cos(alpha)));
-     bY = eval(simplify(aY - AB*sin(alpha))); 
+%%     bX = eval(simplify(aX + AB*cos(alpha)));
+ %%    bY = eval(simplify(aY - AB*sin(alpha))); 
      
-     dX = eval(simplify(cX + CD*cos(gamma)));
-     dY = eval(simplify(cY + CD*sin(gamma)));
+%%     dX = eval(simplify(cX + CD*cos(gamma)));
+ %%    dY = eval(simplify(cY + CD*sin(gamma)));
 
      
      figure(10)
-     plot([eval(aX) bX cX dX eval(eX) fX],...
-         [aY bY  cY dY  eval(eY) fY]);
-     xlim([0 25])
-     ylim([0 25])
 
-    %% pause(0.01)
+     plot([deltaX, eval(Bx), eval(Gx), Cx, eval(eX), eval(Fx), eval(Dx)], [Ay, eval(By), eval(Gy), Cy, eval(eY), eval(Fy), eval(Dy)]);     
+   %  xlim([-30 -25])
+    % ylim([-16 -10])
+
+   %   pause(0.01)
      
      count = count + 1;
 end
@@ -122,7 +124,7 @@ plot(w,eX1,'b');
 hold on;
 plot(w,eY1,'r');
 hold off;
-xlabel('angle, rad')
+xlabel('distance, mm')
 ylabel('eX and eY of E')
 
 figure(2)
@@ -130,7 +132,7 @@ plot(w,eVX1,'b');
 hold on;
 plot(w,eVY1,'r');
 hold off;
-xlabel('angle, rad')
+xlabel('distance, mm')
 ylabel('vX and vY of E')
 
 figure(3)
@@ -138,5 +140,5 @@ plot(w,eAX1,'b');
 hold on;
 plot(w,eAY1,'r');
 hold off;
-xlabel('angle, rad')
+xlabel('distance, mm')
 ylabel('Accel of xE and yE')
